@@ -56,8 +56,9 @@ int readobj(char* file_name, obj_t* obj) {
             sscanf(buf, "%c %lf %lf %lf", &ch, &obj->vertexes[i++],
                    &obj->vertexes[i++], &obj->vertexes[i++]);
           } else if (buf[0] == 'f') {
-            for (temp_ind = 1, j = 1, str1 = buf + 2;; j++, str1 = NULL) {
+            for (temp_ind = 0, j = 1, str1 = buf + 2;; j++, str1 = NULL, temp_ind++) {
               token = strtok_r(str1, space, &temp_str);
+              printf("Temp index %d\n", temp_ind);
               if (token == NULL) break;
               for (str2 = token, v_count = 0;; str2 = NULL, v_count++) {
                 subtoken = strtok_r(str2, slash, &saveptr2);
@@ -77,11 +78,11 @@ int readobj(char* file_name, obj_t* obj) {
               }
             }
           }
-          
+
           err = 0;
         }
         printf("%d, %d, %d\n", obj->polygons[dots * 2 - 2],
-                 obj->polygons[dots * 2 - 1], obj->polygons[dots * 2]);
+               obj->polygons[dots * 2 - 1], obj->polygons[dots * 2]);
 
       } else {
         free(obj->vertexes);
@@ -98,7 +99,7 @@ int readobj(char* file_name, obj_t* obj) {
 
 int main() {
   obj_t obj;
-  char* filename_buf = "cat.obj";
+  char* filename_buf = "cub.obj";
 
   printf("%s\n", filename_buf);
   int err = readobj(filename_buf, &obj);
