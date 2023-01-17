@@ -6,7 +6,7 @@
 #include "string.h"
 
 int readobj(char* file_name, obj_t* obj) {
-  int err = 1;
+  int err = -1;
   FILE* file;
   file = fopen(file_name, "r");
   if (file) {
@@ -56,20 +56,22 @@ int readobj(char* file_name, obj_t* obj) {
             sscanf(buf, "%c %lf %lf %lf", &ch, &obj->vertexes[i++],
                    &obj->vertexes[i++], &obj->vertexes[i++]);
           } else if (buf[0] == 'f') {
-            for (temp_ind = 0, j = 1, str1 = buf + 2;; j++, str1 = NULL, temp_ind++) {
+            for (temp_ind = 0, j = 1, str1 = buf + 2;;
+                 j++, str1 = NULL, temp_ind++) {
               token = strtok_r(str1, space, &temp_str);
-              printf("Temp index %d\n", temp_ind);
-              if (token == NULL) break;
+              if (token == NULL) {
+                obj->polygons[p++] = temp_f;
+                break;
+              }
+
               for (str2 = token, v_count = 0;; str2 = NULL, v_count++) {
                 subtoken = strtok_r(str2, slash, &saveptr2);
                 if (subtoken == NULL) {
-                  obj->polygons[p++] = temp_f;
                   break;
-                }
-                if (v_count == 0) {
+                } else if (v_count == 0) {
                   cur_index = atoi(subtoken);
                   obj->polygons[p++] = cur_index;
-                  if (temp_ind == 1) {
+                  if (temp_ind == 0) {
                     temp_f = cur_index;
                   } else {
                     obj->polygons[p++] = cur_index;
@@ -79,17 +81,14 @@ int readobj(char* file_name, obj_t* obj) {
             }
           }
 
-          err = 0;
+          err = dots;
         }
-        printf("%d, %d, %d\n", obj->polygons[dots * 2 - 2],
-               obj->polygons[dots * 2 - 1], obj->polygons[dots * 2]);
-
       } else {
         free(obj->vertexes);
-        err = 1;
+        err = -1;
       }
     } else {
-      err = 1;
+      err = -1;
     }
     fclose(file);
   }
@@ -99,17 +98,13 @@ int readobj(char* file_name, obj_t* obj) {
 
 int main() {
   obj_t obj;
-  char* filename_buf = "cub.obj";
+  char* filename_buf = "cat.obj";
 
   printf("%s\n", filename_buf);
   int err = readobj(filename_buf, &obj);
-  if (!err) {
-    printf("Count of vertexes: %d\nCount of polygons: %d\n",
+  if (err != -1) {
+    printf("Lines: %d\nCount of vertexes: %d\nCount of polygons: %d\n", err,
            obj.count_of_vertexes, obj.count_of_facets);
-    for (int i = 0; i < 3 * obj.count_of_facets; i++) {
-      // printf("%d\n", obj.polygons[i]);
-    }
-
     free(obj.polygons);
     free(obj.vertexes);
   }
