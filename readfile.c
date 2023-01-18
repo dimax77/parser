@@ -30,7 +30,7 @@ int readobj(char* file_name, obj_t* obj) {
         obj->count_of_facets++;
         for (j = 1, str1 = buf + 2;; j++, str1 = NULL) {
           token = strtok_r(str1, space, &temp_str);
-          if (token == NULL) break;
+          if (token == NULL || (!strcmp(token, "\n"))) break;
           for (str2 = token, v_count = 0;; str2 = NULL) {
             subtoken = strtok_r(str2, slash, &saveptr2);
             if (subtoken == NULL) break;
@@ -59,7 +59,7 @@ int readobj(char* file_name, obj_t* obj) {
             for (temp_ind = 0, j = 1, str1 = buf + 2;;
                  j++, str1 = NULL, temp_ind++) {
               token = strtok_r(str1, space, &temp_str);
-              if (token == NULL) {
+              if (token == NULL || (!strcmp(token, "\n"))) {
                 obj->polygons[p++] = temp_f;
                 break;
               }
@@ -103,6 +103,11 @@ int main() {
   printf("%s\n", filename_buf);
   int err = readobj(filename_buf, &obj);
   if (err != -1) {
+    for (int i = 0, k = 1; i < err; k++, i++) {
+      printf("%d ", obj.polygons[i]);
+      if (k == 6) printf("\n");
+    }
+
     printf("Lines: %d\nCount of vertexes: %d\nCount of polygons: %d\n", err,
            obj.count_of_vertexes, obj.count_of_facets);
     free(obj.polygons);
